@@ -1,0 +1,15 @@
+GUI Group
+- Learning GTKmm documentation
+- Starting on modifying current GUI of robot
+
+Simulation Group
+- Went over Gazebo documentation
+- Setting up Gazebo install on Orin, the main machine used for 
+Razorbotz, for initial robot simulation
+
+Reliability Group
+- Reviewing old codebase while reading ROS2 documentation
+
+
+Collective
+- Rewriting SRS to align with Iowa Competition Criteria

@@ -1,0 +1,45 @@
+CANotes 01-15-2025: 
+Pipelining optimizes for throughtput
+
+- Instruction Fetch (10 ns) --> Decode (10 ns) --> Execute (10 ns) --> Memory (10 ns) --> Write back (10 ns)
+- t_pipeline = (1/k)t_nonepipeline
+    - 1st instruction: k
+    - N instruction: k + n - 1
+    - time = (k + n - 1) * t_pipeline = 51,999 = 1,004 * t_pipeline = 1,004 * 10 ns = 10,000 ns
+
+- Speedup (S_p) = t_old / t_new
+    - t_nonepipeline = 50,000 ns = 1000 instr. * 50 ns/instr.
+    - t_pipelined = 10,000 ns
+    - S_p = t_old / t_new = 50,000 / 10,00 = 5 times speed up
+    - Ideal speedup of a k-stage pipeline is k
+    - t_old = N * t_clk
+    - t_new = (k + N - 1) * (t_clk / k)
+    - S_p = (N * t_clk) / ((k + N - 1) * (t_clk / k))
+    - S_p = N / (1/k * (k + N - 1) * (1 / N)) = k / (k/N) + ((N-1)/N) ...
+    - k / (k/N) + ((N-1)/N) as N goes to infinity (running instructions over and over) = k
+
+- Throughtput increases by k or number of pipeline stages
+- Latency? No change t_clk non-pipelined
+- Why not just increase k for more speedup? Becuase processing more data means need for more processing power which eventually parodoxically increases latency
+- To decrease latency, focus more on parallelism!
+- ML does many matrix computations at once
+
+- What prevents ideal execution? (1 instruction starting and ending in 1 clock cycle)
+    - Instruction dependencies
+        - Data dependencies
+            - Read after write (RAW) dependency with R_1 
+                Ex. ADD R_1 R_2 R_3
+                    ADD R_5 R_1 R_4
+            - Write after read (WAR) dependency with R_2
+                Ex. ADD R_1 R_2 R_3
+                    ADD R_2 R_4 R_5
+            - Read after read (RAR)
+            - Write after write (WAW)
+            - Load Hazard
+                Ex. LD R_1 off(R_2)
+                    ADD R_3 R_1 R_2
+                - Nothing can be done to fix this beside adding nop between LD and read operation
+            - Control Hazard
+                - Conditional Branches...
+        - Dependency vs. Hazard: every hazard is a dependency, a dependency is a hazard if it produces wrong answer                    
+        - Control flow dependencies

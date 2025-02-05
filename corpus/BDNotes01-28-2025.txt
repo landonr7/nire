@@ -1,0 +1,93 @@
+BDNotes 01-28-2025: 
+Hadoop
+- Open source software framework created by Yahoo
+- Hadoop Distributed File System
+- Hadoop MapReduce
+- Architecture
+    - Central control node runs "Name Node" to keep track of HDFS directories and files
+    - Job Tracker disbatches compute tasks to Task Tracker
+    - Main node runs Task Tracker
+    - World
+        - Switch
+            - Switch
+            - 1 switch: Name Mode
+            - 1 switch: Job Tracker
+            - 1 switch: Task Tracker
+HDFS
+- Files are divided into blocks (typically 64MB)
+- Blocks are split across many machines at load time
+    - Different blocks from the same file will be stored on different machines
+- Blocks are replicated across multiple machines (3x by default)
+    - 2x in local rack, 1x elsewhere
+- Name Node 
+    - Keeps track of which blocks make up a file and where they are stored
+    - Stores metadata of HDFS
+        - Updates file system do not change the FSimage (written to log file)
+    - When starting Name Node laods FSimage file then applies changes in the log file
+- Secondary Name Node
+    - NOT a backup
+- Data Node
+    - Stores actual data in HDFS
+    - Can run on any underlying FS
+    - Notifies Name Node of what blocks it has as block reports
+
+Hadoop MapReduce
+- Job Tracker determines execution plan
+    - Splits data into smaller tasks (Map) and sends it to Task Tracker
+    - Keeps work close to data
+- Task Tracker keeps track of performance of an individual mapper or reducer
+    - Reports back to Job Tracker and reports job process
+- Fault Tolerance
+    - Failures are detected by Job Tracker which reassigns the work to another node
+    - If a failed node restarts, it is added back to the system and assigned new tasks
+
+Hadoop Ecosystem
+- YARN: frameowrk for job scheduling and cluster resource management
+- Hive: Hadoop processing with SQL
+- Pig: Hadoop processing with scripting
+- Hbase: DB model built on top of Hadoop
+
+Apache Spark
+- Capable of leveraging Hadoop ecosystem
+- More general framework than Hadoop MapReduce; provides more functions than Map and Reduce
+    - Ex. operations: transformations and actions
+
+Resilient Distributed Dataset (RDD)
+- RDD's represent data or transformations on data
+- Actions can be applied to RDD's; actions force calculations and force return values
+- best suited for applications what apply the same operation to all elements of a dataset
+
+Sample Spark Transformations
+- map(func): Return a new distributed dataset formed by passing each element of the source through a
+function func.
+- flatMap(func): Similar to map, but each input item can be mapped to 0 or more output items (so func should
+return a Seq rather than a single item)
+- union(dataset)
+- intersection(dataset)
+- distinct([numTasks])
+- groupByKey([numTasks])
+- join(dataset, [numTasks])
+- reduceByKey(func, [numPartitions])
+
+Sample Spark Actions
+- reduce(function): : Aggregate the elements of the dataset using a function func (which takes two
+arguments and returns one). The function should be commutative and associative so that it can
+be computed correctly in parallel.
+- collect(): Return all elements of the dataset as an array at the driver program
+    - Usually useful after a filter
+- count(): Return number of elements inthe dataset
+- saveAsTextFile(path): Write elements of the dataset as a text file in a given directory in local FS
+- All actions save locally
+
+Spark RDD Persistence
+- You can cache an RDD
+- Each node stores any partitions of it that it computes in memory and resues them in other actions
+on that dataset
+Allows future actions to be much faster (often > 10x).
+- Mark RDD to be persisted using the persist() or cache() methods on it. The first time it is
+computed in an action, it will be kept in memory on the nodes.
+- Cache is fault-tolerant – if any partition of an RDD is lost, it will automatically be recomputed
+using the transformations that originally created it
+- Can choose storage level (MEMORY_ONLY, DISK_ONLY, MEMORY_AND_DISK, etc.)
+- Can manually call unpersist()
+

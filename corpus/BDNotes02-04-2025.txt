@@ -1,0 +1,67 @@
+BDNotes 02-04-2025: 
+Market-Basket Model
+- Large set of items
+- Large set of baskets
+- Discover association rules
+    - People who bought {x, y, z} tend to buy {v, w}
+
+More Generally
+- Many-to-many mapping between two kinds of things
+    - Connections among item not baskets
+- Items and baskets are abstract
+    - Items/baskets can be words/documents
+
+Applications
+- Baskets = sentences; items = documents in which those sentences appear
+    - Basket is a subset of documents in whcih a certain sentence appears
+    - Items that appear together too often could represent plagiarism
+    - Notice items do not have to be "in" baskets
+    
+Outline
+- First: Define 
+- Frequent itemsets
+    - Find sets of items that appear together "frequently" in baskets 
+    - Support
+        - For itemset I: Number of baskets containing all items in I
+        - Given support threshold s, then sets of items that appear in are 
+        least s baskets are called frequent itemsets
+    
+- Association Rules:
+    - Confidence, support, interestingness
+    - Support of association rule is the support of I U J
+    - Confidence of association rule is the probability of j given I
+        - con(I -> j) = sup(I U j) / sup(I)
+    - Interesting
+        - The rule X → milk may have high confidence for many itemsets X, because
+        milk is just purchased very often (independent of X) and the confidence will
+        be high
+        - Interest of association rule I -> j:
+            - Difference between its confiednce and the fraction of baskets that contain J
+            - int(I -> j) = |con(I -> j) - sup(j)|
+    - Problem: Find all association rules with support >= s and confidence >= c
+        - Hard part: Finding frequent itemsets
+
+- Mining Association Rules:
+    - Step 1: Find all frequent itemsets I and compute supports
+    (we will explain this next)
+    - Step 2: Rule generation
+        - For every I, for every subset A of I, generate a rule A -> I \ A
+
+- Finding Frequent Itemsets
+    - Typically, data is kept in flat files
+    rather than in a database system:
+        - Stored on disk
+        - Stored basket-by-basket
+        - Baskets are small but we have
+        many baskets and many items
+        - Expand baskets into pairs, triples, etc.
+        as you read baskets
+        - Use k nested loops to generate all
+        sets of size k
+        - The true cost of mining disk-resident data
+        is usually the number of disk I/Os
+        - In practice, association-rule algorithms
+        read the data in passes – all baskets read
+        in turn
+        - We measure the cost by the number of
+        passes an algorithm makes over the data

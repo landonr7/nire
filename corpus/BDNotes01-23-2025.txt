@@ -1,0 +1,97 @@
+BDNotes 01-23-2025: 
+Relational Algebra
+- basic SQL like operations which can be used to describe more 
+complex operations
+- Relation R(A_1, A_2, A_3)
+    - In excel sheet, top row is a relation and columns under each 
+    row is a tuple
+- Selection, Projection; Union, Intersection, Difference; Natural 
+join; Grouping and Aggregation
+
+Difference by MapReduce
+- R - S
+    - R and S have same schema
+    - Tuples appear in R not in S
+    - Operation done in Reduce function
+- Map function
+    - For each tuple t in R, produce a key-value pair (t, R)
+    - For each tuple t in S, produce a key-value pair (t, S)
+- Group 
+    - Each reducer receives (t, <R>) or (t, <S>) or (t, <R, S>)
+- Reduce function
+    - If receive (t, <R>), produce (t,t); otherwise, produce nothing
+
+- Natural join by MapReduce
+    - Compute natural join R(A, B) join S(B, C)
+    - R and S are each stored in files
+    - Tuples are pairs (a, b) or (b, c)
+- Map function
+    - For each tuple R(a, b), produce a key-value pair (b(R, R))
+    - For each tuple S(b, c), produce a key-value pair (b(S, c))
+- Group:
+    - Each reducer receives (b, < ⋯ , R, a , ⋯ , S, c , ⋯ >)
+- Reduce Function:
+    - For each pair of (R, a) and (S, c), output (a, c)
+
+Grouping and Aggregation by MapReduce
+- For relation R(A, B, C), compute 𝛾A,𝜃(B)(R) where A is 
+the grouping attributes and 𝜃(B) is the aggregation
+- Map performs the grouping, while Reduce performs the aggregation
+- Map Function
+    - For each tuple (a, b, c), produce a key-value pair (a, b)
+- Group
+    - Each reducer receives (a, < b1, b2, ⋯ >)
+- Reduce Function:
+    - Compute 𝜃(b1, b2, ⋯ ) and output (a, 𝜃)
+
+Matrix Multiplication
+- M = {m_i,j} is a |I| x |J| matrix
+- N = {n_j,k} is a |J| x |K| matrix
+- Compute P = M dot N where: p_i,k - sigma_j=1->n(m_i,j * n_j,k)
+- View M as a relation M(𝐼,𝐽, 𝑉) with tuples (𝑖, 𝑗, 𝑚_𝑖,𝑗)
+- View 𝑵 as a relation 𝑁(𝐽,𝐾, 𝑊) with tuples (𝑗, 𝑘, 𝑛_𝑗,𝑘)
+- Step 1: compute natural join 𝑃(𝐼,𝐾, 𝑉W) = 𝑀(𝐼,𝐽, 𝑉W) ⋈ 𝑁(𝐽,𝐾, 𝑊)
+- Step 2: compute grouping and aggregation for 𝑃(𝐼,𝐾, 𝑉W) with 𝐼 and
+𝐾𝐾 as grouping attributes and sum(𝑉W) as the aggregation 
+
+Workflow of MapReduce
+- Represented by acyclical flow graph a -> b
+    - input -> Map -> Reduce -> output
+
+- Two-step MapReduce (Matrix Multiplication)
+    - M -> Map (join) -> Reduce (join) -> Map (G&A) -> Reduce (G&A) -> P
+    - N -^
+
+Cost Measures for Algorithms
+    - Computation coss
+        - Asymtotic complexity, a funtion of input size, denoted as Big-O
+        - The average complexity of bubble-sport is: O(n^2)
+        - The average complexity of merge-sort is O(nlogn)
+    1. Communication cost = total input size of all tasks
+    2. Elapsed communication cost = maz of total input size of tasks 
+    along any path of flow graph
+    3. Elapsed computation cost = max total running time of tasks along any path in flow graph
+
+Communication Cost usually Dominates
+- The algorithm executed by each task tends to be very simple, often
+linear in the input size
+- The interconnect speed for a computing cluster is much slower than
+the speed of execution by a processor
+- The time taken to move data into main memory is also usually larger
+than the time of execution
+
+How to Measure Computation Cost? Wall-Clock Time
+- Or elapsed real time, considers both communication time and
+computation time (in parallel)
+- Communication cost dominates only when computation workload is
+fairly distributed to multiple tasks (computing nodes)
+- Assigning all work to one task can minimize communication cost, but
+dramatically increase computation time
+
+Measure for Communication Cost
+- Communication cost counts only input size because:
+- If the output of one task is input to another task, then the 
+output will beaccounted for when measuring the input of the receiving 
+task. There is no reason to count it twice
+ -So we only miss the final output. In practice, the final output is
+rarely large in order to be interpretable

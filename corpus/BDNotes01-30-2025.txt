@@ -1,0 +1,23 @@
+BDNotes 01-30-2025: 
+Word Count in Python (cont.)
+- Read target file into an RDD: lines = sc.textFile(sis.argv[1])
+    - lines is RDD with each entry being each line of the txt file
+    - transformation operation
+- Side note: map is a 1-to-1 mapping while flatMap is 1-to-many mapping
+    - map returns one element, flatMap returns list
+- Split the lines into single tokens:
+words = lines.flatMap(lambda l: l.split(" "))
+    - words is RDD with each entry being one word split by a space 
+- Next, replace each word with a tuple of that word and number 1:
+pairs = words.map(lambda w: (w, 1))
+    - pairs is a new RDD where each entry is a key, value pair
+- Now, for count of each word, group elements of RDD by key and add up 
+values: counts = pairs.reduceByKey(lambda n1, n2: n1 + n2)
+    - counts is an RDD that contains key that is each distinct word and
+    value is the count of is cooresponding word
+    - transformation operation
+- lastly, store results in a txt file: I didnt see the code for that
+
+Difference by MapReduce
+- R - S
+- 

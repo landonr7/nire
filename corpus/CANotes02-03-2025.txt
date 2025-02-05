@@ -1,0 +1,19 @@
+CANotes 02-03-2025: 
+FUN GAME: Assume CPU issues 24 bit address; 512KB cache with 256B/line. Show how address ADBEEF maps into the 3 organizations
+- 2^9 * 2^10 / 2^8 = 2^11 = 2048 lines in the cache
+- offset is 8 bits; 256B/line
+- direct address: 5 bits|11 bits|8 bits = 1010 1|101 1011 1110|EF = 15|5BE|EF
+- 4-way set associative address: 7 bits|9 bits|8 bits =  110|1 1011 1110|EF 
+- fully associative address: 16 bits|8 bits = ADBEE|EF
+
+Ways A Cache Misses
+1. Capacity
+2. Cold Start
+3. Conflict
+
+True or False:
+Increasing associativity may reduce cache hit ratio (F)
+Evaluate performance of the cache
+1. Generate a trace -- produces sequence of addresses executed
+
+General Rule: Increasing associativity (wayness) x2 is like increasing size of cache x2

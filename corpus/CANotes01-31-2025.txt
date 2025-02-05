@@ -1,0 +1,32 @@
+CANotes 01-31-2025: 
+Fully Associative Cache
+- Can not tell how big cache is
+
+Direct Mapping (1 way)
+- Can tell how big cache is
+- Address: tag from 8-22, line # from 4-7, and offset from 0-3
+- Expensive b/c requires many compares
+
+Set Associative (n * 2 way: n is number of bits removed from line #)
+- Address: ------tag-----|-#--|-os- (1 way)
+- Address: ------tag------|-#-|-os- (2 way)
+- Address: ------tag-------|#-|-os- (4 way)
+- With removing line # bits, # of compares increases, # of sets decreases
+
+Game... Homework also apparently
+- 128 KB cache, line size 64 B, 4-way set association
+- How many sets do I have
+- 2 K lines = 2^11 lines
+- 128 KB / 4 * 64KB = (2^17 B/cache) / (2^6 B/line) = 2^11 sets (1 way) -> 2^10 sets (2 way) -> 2^9 sets(4 way)
+
+Effectiveness Measured By Hitrate "h"
+- Missrate = 1 - r
+- t_mem = (1 - h)t_mm + ht_cache
+
+Ways Cache Can Miss
+1. Capacity -- no room in cache to cache address
+    - measure using fully associative  
+2. Cold-start -- cache empty
+3. Conflict -- sparse cache, but couple address keep 
+trying to cache in same place (associativity)
+    - direct -> set -> full
