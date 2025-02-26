@@ -1,76 +1,55 @@
-import sys
-import codecs
+from pyspark import SparkContext
 import re
 import os
-from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
-from pyspark.sql import SparkSession
-import nltk
 
-# Initialize NLTK data (add this once)
-nltk.download('stopwords')
-
-# Fix Windows console encoding
-sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
-
-# Initialize Spark context
-spark = SparkSession.builder \
-    .appName("Nire") \
-    .config("spark.executor.memory", "2g") \
-    .config("spark.driver.memory", "2g") \
-    .config("spark.python.worker.memory", "512m") \
-    .getOrCreate()
-
-sc = spark.sparkContext
-
-stop_words = set(stopwords.words('english'))
-ps = PorterStemmer()
+# Initialize Spark Context
+sc = SparkContext("local", "SearchEngineApp")
 
 def tokenize(text):
-    try:
-        # Preserve unicode characters in regex
-        text = re.sub(r'[^\w\s]', '', text.lower(), flags=re.UNICODE)
-        tokens = text.split()
-        return [ps.stem(word) for word in tokens if word not in stop_words]
-    except Exception as e:
-        print(f"Error tokenizing: {str(e)}")
+    """Convert text to lowercase, remove punctuation, and split into unique words"""
+    text = re.sub(r'\W+', ' ', text.lower())
+    words = text.split()
+    return list(set(words))  # Return unique words
+
+# 1. Load and prepare documents
+def load_documents(path):
+    """Load documents with (filename, content) pairs"""
+    return sc.wholeTextFiles(path) \
+             .map(lambda x: (os.path.basename(x[0]), x[1]))
+
+# 2. Create inverted index
+def create_inverted_index(docs_rdd):
+    """Build inverted index: (word -> list of documents)"""
+    return docs_rdd.flatMap(lambda x: [(word, x[0]) for word in tokenize(x[1])]) \
+                   .groupByKey() \
+                   .map(lambda x: (x[0], list(x[1]))) \
+                   .collectAsMap()
+
+# 3. Search function
+def search(query, inverted_index):
+    """Return documents containing all query words"""
+    query_words = tokenize(query)
+    if not query_words:
         return []
-
-def create_invert_index(doc_rdd):
-    return (
-        doc_rdd
-        # Create sets from the start for efficient union
-        .flatMap(lambda x: [(word, {x[0]}) for word in tokenize(x[1])])
-        .reduceByKey(lambda a, b: a.union(b))
-        .mapValues(lambda ids: list(ids))  # Convert set to list for serialization
-    )
-
-# Use raw string for Windows paths
-docs_rdd = sc.wholeTextFiles(r"C:\Users\valor\Desktop\nire\corpus\*.txt") \
-    .map(lambda x: (x[0].split('/')[-1], x[1]))
-
-try:
-    output_path = r"file:///C:/Users/valor/Desktop/nire/output"
     
-    # Remove existing output directory
-    if 'output' in os.listdir('C:/Users/valor/Desktop/nire'):
-        import shutil
-        shutil.rmtree('C:/Users/valor/Desktop/nire/output')
+    # Get document lists for each query word
+    doc_sets = [set(inverted_index.get(word, [])) for word in query_words]
     
-    inverted_index_rdd = create_invert_index(docs_rdd)
-    inverted_index_rdd.saveAsTextFile(output_path)
-    
-    # Optional: Print sample results
-    sample = inverted_index_rdd.take(10)
-    print("\nSample entries:")
-    for word, docs in sample:
-        print(f"{word}: {docs}")
-        
-except Exception as e:
-    print(f"Critical error: {str(e)}")
-    import traceback
-    traceback.print_exc()
-    spark.stop()
-    sys.exit(1)
+    # Find common documents across all query words
+    return list(set.intersection(*doc_sets)) if doc_sets else []
 
-spark.stop()
+# Main execution
+if __name__ == "__main__":
+    # Load documents (update path to your files)
+    docs_rdd = load_documents("notes/*.txt")
+    
+    # Build inverted index
+    inverted_index = create_inverted_index(docs_rdd)
+    
+    # Example queries
+    print("Documents containing 'hello world':", search("hello world", inverted_index))
+    print("Documents containing 'spark':", search("spark", inverted_index))
+    
+    # Keep context alive for exploration (optional)
+    # input("Press Enter to stop...")
+    sc.stop()
