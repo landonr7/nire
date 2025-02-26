@@ -3,7 +3,7 @@ import re
 import os
 
 # Initialize Spark Context
-sc = SparkContext("local", "SearchEngineApp")
+sc = SparkContext("local", "Nire")
 
 def tokenize(text):
     """Convert text to lowercase, remove punctuation, and split into unique words"""
@@ -41,14 +41,14 @@ def search(query, inverted_index):
 # Main execution
 if __name__ == "__main__":
     # Load documents (update path to your files)
-    docs_rdd = load_documents("notes/*.txt")
+    docs_rdd = load_documents("corpus/*.txt")
     
     # Build inverted index
     inverted_index = create_inverted_index(docs_rdd)
     
     # Example queries
     print("Documents containing 'hello world':", search("hello world", inverted_index))
-    print("Documents containing 'spark':", search("spark", inverted_index))
+    print("Documents containing 'speaking':", search("spark", inverted_index))
     
     # Keep context alive for exploration (optional)
     # input("Press Enter to stop...")

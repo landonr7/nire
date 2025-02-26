@@ -1,8 +1,6 @@
 from pyspark.sql import SparkSession
 import os
 import sys
-import findspark
-findspark.init("D:\\spark\\spark-3.5.4-bin-hadoop3")
 
 # Initialize Spark session
 spark = SparkSession.builder \
